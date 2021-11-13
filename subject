@@ -1,0 +1,87 @@
+import { Component } from '@angular/core';
+import { Observable, of, from, interval, Subject } from 'rxjs';
+import { ajax } from 'rxjs/ajax';
+
+@Component({
+  selector: 'my-app',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+})
+export class AppComponent {
+  name = 'Angular';
+  subject = new Subject(); // no initial value
+  data = ajax(
+    `https://jsonplaceholder.typicode.com/users/${Math.floor(
+      Math.random() * 10
+    )}`
+  );
+  ngOnInit() {
+     this.subjectWithSubscriptionAfterEmission();
+    //  this.subjectWithNormalSubscription();
+    // this.subjectWithLateSubscription();
+    // this.subjectWithLateSubscriptionAndEmission();
+    // this.multicastDemoWithSubject();
+    // this.subjectAsDataConsumer();
+    // this.subjectAsDataProvider();
+  }
+  subjectWithSubscriptionAfterEmission() {
+    console.log('Subject With Subscription After Emission has nothing to display');
+    this.subject.next(0);
+    this.subject.subscribe((d) => { console.log('SubscriptionAfterEmission :', d); });
+  }
+  subjectWithNormalSubscription() {
+    console.log('Subject With Normal Subscription');
+
+    this.subject.subscribe((d) => {console.log('subjectWithNormalSubscription :', d); });
+    this.subject.next(1);
+    this.subject.next(2);
+  }
+  subjectWithLateSubscription() {
+    console.log('subject With Late Subscription');
+    this.subject.subscribe((d) => {console.log('Subscription1 :', d); });
+    this.subject.next(1);
+    this.subject.next(2);
+    setTimeout(() => {
+      console.log('after 3 secs');
+      console.log('Subscription has no values to display as there are no emission  after Subscription2');
+      this.subject.subscribe((d) => {console.log('Subscription2:', d); });
+                     }, 3000);
+  }
+  subjectWithLateSubscriptionAndEmission() {
+    console.log('subject With Late Subscription And Emission');
+    this.subject.subscribe((d) => {console.log('Subscription1 :', d); });
+    this.subject.next(1);
+    this.subject.next(2);
+    setTimeout(() => {
+      console.log('after 3 secs');
+      this.subject.subscribe((d) => {console.log('Subscription2:', d); });
+      this.subject.next(3);
+                      }, 3000);
+  }
+
+  subjectAsDataConsumer() {
+    //subject as data consumer examples
+    this.subject.subscribe((d) => {console.log('subscriber1 :', d); });
+    this.subject.subscribe((d) => { console.log('subscriber2 :', d);});
+    this.data.subscribe(this.subject);
+  }
+
+ multicastDemoWithSubject(){
+    //subject as data provider examples
+    this.subject.subscribe((d) => {console.log('subscriber1', d); });
+    this.subject.subscribe((d) => {console.log('subscriber2', d); });
+    this.subject.subscribe((d) => {console.log('subscriber3', d); });
+    this.subject.next(Math.random());
+ }
+
+  subjectAsDataProvider() {
+    //subject as data provider examples
+    this.subject.subscribe((d) => { console.log('subscriber1', d); });
+    this.subject.subscribe((d) => { console.log('subscriber2', d); });
+    this.subject.subscribe((d) => { console.log('subscriber3', d); });
+    this.subject.next('hi');
+    this.subject.subscribe((d) => {console.log('subscriber4', d);  });
+    this.subject.next('hello');
+  }
+
+}
